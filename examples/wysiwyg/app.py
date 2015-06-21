@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 from wtforms import fields, widgets
 
-import flask_admin as admin
-from flask_admin.contrib import sqla
+import pyramid_admin as admin
+from pyramid_admin.contrib import sqla
 
 # Create application
 app = Flask(__name__)

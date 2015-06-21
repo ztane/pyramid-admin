@@ -3,8 +3,8 @@ import os.path as op
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-import flask_admin as admin
-from flask_admin.contrib.sqla import ModelView
+import pyramid_admin as admin
+from pyramid_admin.contrib.sqla import ModelView
 
 
 # Create application

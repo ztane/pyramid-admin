@@ -3,8 +3,8 @@ import os.path as op
 
 from flask import Flask
 
-import flask_admin as admin
-from flask_admin.contrib import fileadmin
+import pyramid_admin as admin
+from pyramid_admin.contrib import fileadmin
 
 
 # Create flask app

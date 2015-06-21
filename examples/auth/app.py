@@ -4,9 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required, current_user
 from flask_security.utils import encrypt_password
-import flask_admin
-from flask_admin.contrib import sqla
-from flask_admin import helpers as admin_helpers
+import pyramid_admin
+from pyramid_admin.contrib import sqla
+from pyramid_admin import helpers as admin_helpers
 
 
 # Create Flask application
@@ -82,7 +82,7 @@ def index():
     return render_template('index.html')
 
 # Create admin
-admin = flask_admin.Admin(
+admin = pyramid_admin.Admin(
     app,
     'Example: Auth',
     base_template='my_master.html',

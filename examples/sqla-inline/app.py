@@ -9,12 +9,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 from wtforms import fields
 
-import flask_admin as admin
-from flask_admin.form import RenderTemplateWidget
-from flask_admin.model.form import InlineFormAdmin
-from flask_admin.contrib.sqla import ModelView
-from flask_admin.contrib.sqla.form import InlineModelConverter
-from flask_admin.contrib.sqla.fields import InlineModelFormList
+import pyramid_admin as admin
+from pyramid_admin.form import RenderTemplateWidget
+from pyramid_admin.model.form import InlineFormAdmin
+from pyramid_admin.contrib.sqla import ModelView
+from pyramid_admin.contrib.sqla.form import InlineModelConverter
+from pyramid_admin.contrib.sqla.fields import InlineModelFormList
 
 # Create application
 app = Flask(__name__)

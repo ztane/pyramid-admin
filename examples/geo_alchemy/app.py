@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-import flask_admin as admin
+import pyramid_admin as admin
 from geoalchemy2.types import Geometry
-from flask_admin.contrib.geoa import ModelView
+from pyramid_admin.contrib.geoa import ModelView
 
 
 # Create application

@@ -1,11 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from flask_admin.contrib import sqla
-from flask_admin import expose, Admin
+from pyramid_admin.contrib import sqla
+from pyramid_admin import expose, Admin
 
 # required for creating custom filters
-from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
+from pyramid_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
 
 # Create application
 app = Flask(__name__)

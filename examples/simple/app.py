@@ -1,6 +1,6 @@
 from flask import Flask
 
-import flask_admin as admin
+import pyramid_admin as admin
 
 
 # Create custom admin view

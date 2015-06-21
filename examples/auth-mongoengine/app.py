@@ -3,10 +3,10 @@ from flask_mongoengine import MongoEngine
 
 from wtforms import form, fields, validators
 
-import flask_admin as admin
+import pyramid_admin as admin
 import flask_login as login
-from flask_admin.contrib.mongoengine import ModelView
-from flask_admin import helpers
+from pyramid_admin.contrib.mongoengine import ModelView
+from pyramid_admin import helpers
 
 # Create application
 app = Flask(__name__)

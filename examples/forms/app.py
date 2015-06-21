@@ -7,9 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
 
-from flask_admin import Admin, form
-from flask_admin.form import rules
-from flask_admin.contrib import sqla
+from pyramid_admin import Admin, form
+from pyramid_admin.form import rules
+from pyramid_admin.contrib import sqla
 
 
 # Create application

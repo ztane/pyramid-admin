@@ -2,8 +2,8 @@ from flask import Flask
 
 from redis import Redis
 
-import flask_admin as admin
-from flask_admin.contrib import rediscli
+import pyramid_admin as admin
+from pyramid_admin.contrib import rediscli
 
 # Create flask app
 app = Flask(__name__)

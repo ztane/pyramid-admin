@@ -1,10 +1,10 @@
 from flask import Flask, request, session
 from flask_sqlalchemy import SQLAlchemy
 
-import flask_admin as admin
+import pyramid_admin as admin
 from flask_babelex import Babel
 
-from flask_admin.contrib import sqla
+from pyramid_admin.contrib import sqla
 
 # Create application
 app = Flask(__name__)

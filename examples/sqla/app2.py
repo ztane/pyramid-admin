@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-import flask_admin as admin
-from flask_admin.contrib import sqla
+import pyramid_admin as admin
+from pyramid_admin.contrib import sqla
 
 
 # Create application

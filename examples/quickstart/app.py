@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_admin import Admin
+from pyramid_admin import Admin
 
 
 app = Flask(__name__)

@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_admin import Admin, BaseView, expose
+from pyramid_admin import Admin, BaseView, expose
 
 
 class MyView(BaseView):

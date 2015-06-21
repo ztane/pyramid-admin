@@ -5,9 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from wtforms import validators
 
-import flask_admin as admin
-from flask_admin.contrib import sqla
-from flask_admin.contrib.sqla import filters
+import pyramid_admin as admin
+from pyramid_admin.contrib import sqla
+from pyramid_admin.contrib.sqla import filters
 
 
 # Create application

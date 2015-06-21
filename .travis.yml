@@ -22,4 +22,4 @@ install:
   - pip install -r requirements-dev.txt
 
 
-script: nosetests flask_admin/tests
+script: nosetests pyramid_admin/tests

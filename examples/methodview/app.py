@@ -1,6 +1,6 @@
 from flask import Flask, redirect, request
 
-import flask_admin as admin
+import pyramid_admin as admin
 from flask.views import MethodView
 
 
