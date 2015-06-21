@@ -24,7 +24,7 @@ from .ajax import process_ajax_references, create_ajax_loader
 from .subdoc import convert_subdocuments
 
 # Set up logger
-log = logging.getLogger("flask-admin.mongo")
+log = logging.getLogger("pyramid-admin.mongo")
 
 
 SORTABLE_FIELDS = set((

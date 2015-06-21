@@ -11,7 +11,7 @@ from pyramid_admin.babel import gettext
 from pyramid_admin._compat import VER
 
 # Set up logger
-log = logging.getLogger("flask-admin.redis")
+log = logging.getLogger("pyramid-admin.redis")
 
 
 class CommandError(Exception):

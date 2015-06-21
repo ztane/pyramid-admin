@@ -18,7 +18,7 @@ from .tools import get_primary_key, parse_like_term
 from .ajax import create_ajax_loader
 
 # Set up logger
-log = logging.getLogger("flask-admin.peewee")
+log = logging.getLogger("pyramid-admin.peewee")
 
 
 class ModelView(BaseModelView):

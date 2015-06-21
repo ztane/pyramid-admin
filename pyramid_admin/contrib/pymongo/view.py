@@ -16,7 +16,7 @@ from .filters import BasePyMongoFilter
 from .tools import parse_like_term
 
 # Set up logger
-log = logging.getLogger("flask-admin.pymongo")
+log = logging.getLogger("pyramid-admin.pymongo")
 
 
 class ModelView(BaseModelView):

@@ -25,7 +25,7 @@ from .tools import get_query_for_ids
 from .ajax import create_ajax_loader
 
 # Set up logger
-log = logging.getLogger("flask-admin.sqla")
+log = logging.getLogger("pyramid-admin.sqla")
 
 
 class ModelView(BaseModelView):
