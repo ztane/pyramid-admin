@@ -34,8 +34,6 @@ class AjaxModelLoader(object):
         """
             Return models that match `query`.
 
-            :param view:
-                Administrative view.
             :param query:
                 Query string
             :param offset:

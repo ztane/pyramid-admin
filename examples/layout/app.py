@@ -41,9 +41,9 @@ class Page(db.Model):
 
 # Customized admin interface
 class CustomView(ModelView):
-    list_template = 'list.html'
-    create_template = 'create.html'
-    edit_template = 'edit.html'
+    list_template = 'list.jinja2'
+    create_template = 'create.jinja2'
+    edit_template = 'edit.jinja2'
 
 
 class UserAdmin(CustomView):
@@ -58,7 +58,7 @@ def index():
 
 
 # Create admin with custom base template
-admin = admin.Admin(app, 'Example: Layout', base_template='layout.html')
+admin = admin.Admin(app, 'Example: Layout', base_template='layout.jinja2')
 
 # Add views
 admin.add_view(UserAdmin(User, db.session))

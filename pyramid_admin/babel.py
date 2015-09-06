@@ -1,5 +1,5 @@
 try:
-    from flask_babelex import Domain
+    from pyramid_babelex import Domain
 
 except ImportError:
     def gettext(string, **variables):

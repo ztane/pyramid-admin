@@ -17,7 +17,7 @@ class MockView(base.BaseView):
 
     @base.expose('/test/')
     def test(self):
-        return self.render('mock.html')
+        return self.render('mock.jinja2')
 
     def _handle_view(self, name, **kwargs):
         if self.allow_call:
@@ -46,30 +46,30 @@ class MockMethodView(base.BaseView):
     @base.expose_plugview('/_api/1')
     class API1(MethodView):
         def get(self, cls):
-            return cls.render('method.html', request=request, name='API1')
+            return cls.render('method.jinja2', request=request, name='API1')
 
         def post(self, cls):
-            return cls.render('method.html', request=request, name='API1')
+            return cls.render('method.jinja2', request=request, name='API1')
 
         def put(self, cls):
-            return cls.render('method.html', request=request, name='API1')
+            return cls.render('method.jinja2', request=request, name='API1')
 
         def delete(self, cls):
-            return cls.render('method.html', request=request, name='API1')
+            return cls.render('method.jinja2', request=request, name='API1')
 
     @base.expose_plugview('/_api/2')
     class API2(MethodView):
         def get(self, cls):
-            return cls.render('method.html', request=request, name='API2')
+            return cls.render('method.jinja2', request=request, name='API2')
 
         def post(self, cls):
-            return cls.render('method.html', request=request, name='API2')
+            return cls.render('method.jinja2', request=request, name='API2')
 
     @base.expose_plugview('/_api/3')
     @base.expose_plugview('/_api/4')
     class DoubleExpose(MethodView):
         def get(self, cls):
-            return cls.render('method.html', request=request, name='API3')
+            return cls.render('method.jinja2', request=request, name='API3')
 
 
 def test_baseview_defaults():
@@ -90,7 +90,7 @@ def test_base_defaults():
     eq_(admin.endpoint, 'admin')
     eq_(admin.app, None)
     ok_(admin.index_view is not None)
-    eq_(admin.index_view._template, 'admin/index.html')
+    eq_(admin.index_view._template, 'admin/index.jinja2')
 
     # Check if default view was added
     eq_(len(admin._views), 1)

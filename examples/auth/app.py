@@ -79,13 +79,13 @@ class MyModelView(sqla.ModelView):
 # Flask views
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.jinja2')
 
 # Create admin
 admin = pyramid_admin.Admin(
     app,
     'Example: Auth',
-    base_template='my_master.html',
+    base_template='my_master.jinja2',
     template_mode='bootstrap3',
 )
 

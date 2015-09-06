@@ -137,9 +137,9 @@ html_last_updated_fmt = '%b %d, %Y'
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-    'index': ['sidebarintro.html', 'sourcelink.html', 'searchbox.html'],
-    '**': ['localtoc.html', 'relations.html',
-           'sourcelink.html', 'searchbox.html']
+    'index': ['sidebarintro.jinja2', 'sourcelink.jinja2', 'searchbox.jinja2'],
+    '**': ['localtoc.jinja2', 'relations.jinja2',
+           'sourcelink.jinja2', 'searchbox.jinja2']
 }
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

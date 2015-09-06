@@ -1,13 +1,16 @@
-import os.path as op
-
+from itertools import count
 from functools import wraps
+from pyramid.httpexceptions import HTTPForbidden
 
-from flask import Blueprint, current_app, render_template, abort, g, url_for
+from pyramid.renderers import render_to_response
+from pyramid.threadlocal import get_current_registry
+from ._compat import g, url_for, get_flashed_messages
 from . import babel
 from ._compat import with_metaclass
 from . import helpers as h
 
 # For compatibility reasons import MenuLink
+# noinspection PyUnresolvedReferences
 from .menu import MenuCategory, MenuView, MenuLink
 
 
@@ -198,11 +201,10 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
         self.menu_icon_type = menu_icon_type
         self.menu_icon_value = menu_icon_value
 
-        # Initialized from create_blueprint
         self.admin = None
-        self.blueprint = None
 
         # Default view
+        # noinspection PyUnresolvedReferences
         if self._default_view is None:
             raise Exception(u'Attempted to instantiate admin view %s without default view' % self.__class__.__name__)
 
@@ -216,10 +218,11 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
 
         return self.__class__.__name__.lower()
 
-    def create_blueprint(self, admin):
+    def configure_to(self, admin, config):
         """
-            Create Flask blueprint.
+            Configure the views into Pyramid Configurator
         """
+
         # Store admin instance
         self.admin = admin
 
@@ -248,25 +251,37 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
                 self.static_folder = 'static'
                 self.static_url_path = '/static/admin'
 
-        # If name is not povided, use capitalized endpoint name
+        # If name is not provided, use capitalized endpoint name
         if self.name is None:
             self.name = self._prettify_class_name(self.__class__.__name__)
 
-        # Create blueprint and register rules
-        self.blueprint = Blueprint(self.endpoint, __name__,
-                                   url_prefix=self.url,
-                                   subdomain=self.admin.subdomain,
-                                   template_folder=op.join('templates', self.admin.template_mode),
-                                   static_folder=self.static_folder,
-                                   static_url_path=self.static_url_path)
+        prefix = self.url or ''
+        prefix = prefix.rstrip('/')
 
+        if not hasattr(config.registry, 'admin_routes'):
+            config.registry.admin_routes = set()
+
+        # noinspection PyUnresolvedReferences
         for url, name, methods in self._urls:
-            self.blueprint.add_url_rule(url,
-                                        name,
-                                        getattr(self, name),
-                                        methods=methods)
+            route_name = self.endpoint + '.' + name
+            for i in count(1):
+                unique_route_name = '%s--%d' % (route_name, i)
+                if unique_route_name not in config.registry.admin_routes:
+                    break
 
-        return self.blueprint
+            url = prefix + '/' + url.lstrip('/')
+
+            config.add_route(unique_route_name, url)
+            view_func = getattr(self, name)
+
+            config.add_view(view=self.view_wrapper(view_func),
+                            route_name=unique_route_name)
+
+    def view_wrapper(self, func):
+        def wrapper(request, context):
+            return func()
+
+        return wrapper
 
     def render(self, template, **kwargs):
         """
@@ -277,6 +292,7 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
             :param kwargs:
                 Template arguments
         """
+
         # Store self as admin_view
         kwargs['admin_view'] = self
         kwargs['admin_base_template'] = self.admin.base_template
@@ -291,12 +307,14 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
         kwargs['get_url'] = self.get_url
 
         # Expose config info
-        kwargs['config'] = current_app.config
+        kwargs['url_for'] = url_for
+        kwargs['get_flashed_messages'] = get_flashed_messages
+        kwargs['config'] = get_current_registry()
 
         # Contribute extra arguments
         kwargs.update(self._template_args)
 
-        return render_template(template, **kwargs)
+        return render_to_response(template, kwargs)
 
     def _prettify_class_name(self, name):
         """
@@ -365,7 +383,7 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
             By default, it throw HTTP 403 error. Override this method to
             customize the behaviour.
         """
-        return abort(403)
+        raise HTTPForbidden()
 
     def get_url(self, endpoint, **kwargs):
         """
@@ -382,10 +400,10 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
 
     @property
     def _debug(self):
-        if not self.admin or not self.admin.app:
+        if not self.admin or not self.admin.config:
             return False
 
-        return self.admin.app.debug
+        return bool(self.admin.config.registry.settings.get('debug'))
 
 
 class AdminIndexView(BaseView):
@@ -398,7 +416,7 @@ class AdminIndexView(BaseView):
                 @expose('/')
                 def index(self):
                     arg1 = 'Hello'
-                    return self.render('admin/myhome.html', arg1=arg1)
+                    return self.render('admin/myhome.jinja2', arg1=arg1)
 
             admin = Admin(index_view=MyHomeView())
 
@@ -409,7 +427,7 @@ class AdminIndexView(BaseView):
                 app,
                 index_view=AdminIndexView(
                     name='Home',
-                    template='admin/myhome.html',
+                    template='admin/myhome.jinja2',
                     url='/'
                 )
             )
@@ -420,11 +438,11 @@ class AdminIndexView(BaseView):
         * If an endpoint is not provided, will default to ``admin``
         * Default URL route is ``/admin``.
         * Automatically associates with static folder.
-        * Default template is ``admin/index.html``
+        * Default template is ``admin/index.jinja2``
     """
     def __init__(self, name=None, category=None,
                  endpoint=None, url=None,
-                 template='admin/index.html',
+                 template='admin/index.jinja2',
                  menu_class_name=None,
                  menu_icon_type=None,
                  menu_icon_value=None):
@@ -447,7 +465,7 @@ class Admin(object):
     """
         Collection of the admin views. Also manages menu structure.
     """
-    def __init__(self, app=None, name=None,
+    def __init__(self, config=None, name=None,
                  url=None, subdomain=None,
                  index_view=None,
                  translations_path=None,
@@ -458,8 +476,8 @@ class Admin(object):
         """
             Constructor.
 
-            :param app:
-                Flask application object
+            :param config:
+                Pyramid Configurator object
             :param name:
                 Application name. Will be displayed in the main menu and as a page title. Defaults to "Admin"
             :param url:
@@ -478,12 +496,12 @@ class Admin(object):
                 Static URL Path. If provided, this specifies the default path to the static url directory for
                 all its views. Can be overridden in view configuration.
             :param base_template:
-                Override base HTML template for all static views. Defaults to `admin/base.html`.
+                Override base HTML template for all static views. Defaults to `admin/base.jinja2`.
             :param template_mode:
                 Base template path. Defaults to `bootstrap2`. If you want to use
                 Bootstrap 3 integration, change it to `bootstrap3`.
         """
-        self.app = app
+        self.config = config
 
         self.translations_path = translations_path
 
@@ -494,6 +512,7 @@ class Admin(object):
 
         if name is None:
             name = 'Admin'
+
         self.name = name
 
         self.index_view = index_view or AdminIndexView(endpoint=endpoint, url=url)
@@ -501,14 +520,14 @@ class Admin(object):
         self.url = url or self.index_view.url
         self.static_url_path = static_url_path
         self.subdomain = subdomain
-        self.base_template = base_template or 'admin/base.html'
+        self.base_template = base_template or 'admin/base.jinja2'
         self.template_mode = template_mode or 'bootstrap2'
 
         # Add predefined index view
         self.add_view(self.index_view)
 
         # Register with application
-        if app is not None:
+        if config is not None:
             self._init_extension()
 
     def add_view(self, view):
@@ -522,8 +541,8 @@ class Admin(object):
         self._views.append(view)
 
         # If app was provided in constructor, register view with Flask app
-        if self.app is not None:
-            self.app.register_blueprint(view.create_blueprint(self))
+        if self.config is not None:
+            view.configure_to(self, self.config)
 
         self._add_view_to_menu(view)
 
@@ -565,26 +584,26 @@ class Admin(object):
     def get_category_menu_item(self, name):
         return self._menu_categories.get(name)
 
-    def init_app(self, app):
+    def init_app(self, config):
         """
             Register all views with the Flask application.
 
-            :param app:
+            :param config:
                 Flask application instance
         """
-        self.app = app
+        self.config = config
 
         self._init_extension()
 
         # Register views
         for view in self._views:
-            app.register_blueprint(view.create_blueprint(self))
+            view.configure_to(self, self.config)
 
     def _init_extension(self):
-        if not hasattr(self.app, 'extensions'):
-            self.app.extensions = dict()
+        if not hasattr(self.config.registry, 'extensions'):
+            self.config.registry.extensions = {}
 
-        admins = self.app.extensions.get('admin', [])
+        admins = self.config.registry.extensions.setdefault('admin', [])
 
         for p in admins:
             if p.endpoint == self.endpoint:
@@ -596,7 +615,6 @@ class Admin(object):
                                 u' URL and subdomain to the same application.')
 
         admins.append(self)
-        self.app.extensions['admin'] = admins
 
     def menu(self):
         """

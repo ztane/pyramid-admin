@@ -1,0 +1,6 @@
+{% extends 'admin/master.jinja2' %}
+{% import 'admin/lib.jinja2' as lib with context %}
+
+{% block body %}
+    {{ lib.render_form(form, dir_url) }}
+{% endblock %}

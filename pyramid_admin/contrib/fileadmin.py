@@ -1,25 +1,26 @@
 import os
 import os.path as op
 import platform
+from pyramid.httpexceptions import HTTPNotFound
+from pyramid.response import FileResponse
+from pyramid.threadlocal import get_current_request
 import re
 import shutil
 
 from datetime import datetime
 from operator import itemgetter
-from werkzeug import secure_filename
-
-from flask import flash, redirect, abort, request, send_file
 
 from wtforms import fields, validators
 
 from pyramid_admin import form, helpers
-from pyramid_admin._compat import urljoin, as_unicode
+from pyramid_admin._compat import urljoin, as_unicode, flash, redirect, secure_filename
 from pyramid_admin.base import BaseView, expose
 from pyramid_admin.actions import action, ActionsMixin
 from pyramid_admin.babel import gettext, lazy_gettext
 
 
 class FileAdmin(BaseView, ActionsMixin):
+    # noinspection PyUnresolvedReferences
     """
         Simple file-management interface.
 
@@ -93,27 +94,27 @@ class FileAdmin(BaseView, ActionsMixin):
                 editable_extensions = ('md', 'html', 'txt')
     """
 
-    list_template = 'admin/file/list.html'
+    list_template = 'admin/file/list.jinja2'
     """
         File list template
     """
 
-    upload_template = 'admin/file/form.html'
+    upload_template = 'admin/file/form.jinja2'
     """
         File upload template
     """
 
-    mkdir_template = 'admin/file/form.html'
+    mkdir_template = 'admin/file/form.jinja2'
     """
         Directory creation (mkdir) template
     """
 
-    rename_template = 'admin/file/rename.html'
+    rename_template = 'admin/file/rename.jinja2'
     """
         Rename template
     """
 
-    edit_template = 'admin/file/edit.html'
+    edit_template = 'admin/file/edit.jinja2'
     """
         Edit template
     """
@@ -289,11 +290,12 @@ class FileAdmin(BaseView, ActionsMixin):
 
             Override to implement custom behavior.
         """
+        request = get_current_request()
         upload_form_class = self.get_upload_form()
-        if request.form:
+        if request.POST:
             # Workaround for allowing both CSRF token + FileField to be submitted
             # https://bitbucket.org/danjac/flask-wtf/issue/12/fieldlist-filefield-does-not-follow
-            formdata = request.form.copy() # as request.form is immutable
+            formdata = request.POST.copy() # as request.POST is immutable
             formdata.update(request.files)
 
             # admin=self allows the form to use self.is_file_allowed
@@ -309,11 +311,12 @@ class FileAdmin(BaseView, ActionsMixin):
 
             Override to implement custom behavior.
         """
+        request = get_current_request()
         name_form_class = self.get_name_form()
-        if request.form:
-            return name_form_class(request.form)
-        elif request.args:
-            return name_form_class(request.args)
+        if request.POST:
+            return name_form_class(request.POST)
+        elif request.GET:
+            return name_form_class(request.GET)
         else:
             return name_form_class()
 
@@ -323,9 +326,10 @@ class FileAdmin(BaseView, ActionsMixin):
 
             Override to implement custom behavior.
         """
+        request = get_current_request()
         edit_form_class = self.get_edit_form()
-        if request.form:
-            return edit_form_class(request.form)
+        if request.POST:
+            return edit_form_class(request.POST)
         else:
             return edit_form_class()
 
@@ -335,9 +339,10 @@ class FileAdmin(BaseView, ActionsMixin):
 
             Override to implement custom behavior.
         """
+        request = get_current_request()
         delete_form_class = self.get_delete_form()
-        if request.form:
-            return delete_form_class(request.form)
+        if request.POST:
+            return delete_form_class(request.POST)
         else:
             return delete_form_class()
 
@@ -463,10 +468,10 @@ class FileAdmin(BaseView, ActionsMixin):
             directory = op.normpath(op.join(base_path, path))
 
             if not self.is_in_folder(base_path, directory):
-                abort(404)
+                raise HTTPNotFound
 
         if not op.exists(directory):
-            abort(404)
+            raise HTTPNotFound
 
         return base_path, directory, path
 
@@ -656,7 +661,7 @@ class FileAdmin(BaseView, ActionsMixin):
                 File path.
         """
         if not self.can_download:
-            abort(404)
+            raise HTTPNotFound
 
         base_path, directory, path = self._normalize_path(path)
 
@@ -666,7 +671,7 @@ class FileAdmin(BaseView, ActionsMixin):
             base_url = urljoin(self.get_url('.index'), base_url)
             return redirect(urljoin(base_url, path))
 
-        return send_file(directory)
+        return FileResponse(directory, request=get_current_request())
 
     @expose('/mkdir/', methods=('GET', 'POST'))
     @expose('/mkdir/<path:path>', methods=('GET', 'POST'))
@@ -809,9 +814,10 @@ class FileAdmin(BaseView, ActionsMixin):
         """
             Edit view method
         """
+        request = get_current_request()
         next_url = None
 
-        path = request.args.getlist('path')
+        path = request.GET.getall('path')
         if not path:
             return redirect(self.get_url('.index'))
 
@@ -833,11 +839,11 @@ class FileAdmin(BaseView, ActionsMixin):
         error = False
 
         if self.validate_form(form):
-            form.process(request.form, content='')
+            form.process(request.POST, content='')
             if form.validate():
                 try:
                     with open(full_path, 'w') as f:
-                        f.write(request.form['content'])
+                        f.write(request.POST['content'])
                 except IOError:
                     flash(gettext("Error saving changes to %(name)s.", name=path), 'error')
                     error = True

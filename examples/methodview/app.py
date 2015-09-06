@@ -7,23 +7,23 @@ from flask.views import MethodView
 class ViewWithMethodViews(admin.BaseView):
     @admin.expose('/')
     def index(self):
-        return self.render('methodtest.html')
+        return self.render('methodtest.jinja2')
 
     @admin.expose_plugview('/_api/1')
     class API_v1(MethodView):
         def get(self, cls):
-            return cls.render('test.html', request=request, name="API_v1")
+            return cls.render('test.jinja2', request=request, name="API_v1")
 
         def post(self, cls):
-            return cls.render('test.html', request=request, name="API_v1")
+            return cls.render('test.jinja2', request=request, name="API_v1")
 
     @admin.expose_plugview('/_api/2')
     class API_v2(MethodView):
         def get(self, cls):
-            return cls.render('test.html', request=request, name="API_v2")
+            return cls.render('test.jinja2', request=request, name="API_v2")
 
         def post(self, cls):
-            return cls.render('test.html', request=request, name="API_v2")
+            return cls.render('test.jinja2', request=request, name="API_v2")
 
 
 # Create flask app

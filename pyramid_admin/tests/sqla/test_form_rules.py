@@ -38,7 +38,7 @@ def test_rule_macro():
     db.create_all()
 
     view = CustomModelView(Model1, db.session,
-                           create_template='macro.html',
+                           create_template='macro.jinja2',
                            form_create_rules=(rules.Macro('test', arg='foobar'),
                                               rules.Macro('test_lib.another_test')))
     admin.add_view(view)
@@ -60,7 +60,7 @@ def test_rule_container():
     db.create_all()
 
     view = CustomModelView(Model1, db.session,
-                           create_template='macro.html',
+                           create_template='macro.jinja2',
                            form_create_rules=(rules.Container('wrap', rules.Macro('test_lib.another_test')),))
     admin.add_view(view)
 

@@ -7,13 +7,13 @@ import pyramid_admin as admin
 class FirstView(admin.BaseView):
     @admin.expose('/')
     def index(self):
-        return self.render('first.html')
+        return self.render('first.jinja2')
 
 
 class SecondView(admin.BaseView):
     @admin.expose('/')
     def index(self):
-        return self.render('second.html')
+        return self.render('second.jinja2')
 
 
 # Create flask app

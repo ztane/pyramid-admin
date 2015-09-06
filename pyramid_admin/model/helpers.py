@@ -22,8 +22,8 @@ def get_mdict_item_or_list(mdict, key):
         :param key: key to look for
         :return: the value for the key or None if the Key has not be found
     """
-    if hasattr(mdict, 'getlist'):
-        v = mdict.getlist(key)
+    if hasattr(mdict, 'getall'):
+        v = mdict.getall(key)
         if len(v) == 1:
             value = v[0]
 

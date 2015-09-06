@@ -23,7 +23,7 @@ babel = Babel(app)
 
 @babel.localeselector
 def get_locale():
-    override = request.args.get('lang')
+    override = request.GET.get('lang')
 
     if override:
         session['lang'] = override

@@ -110,7 +110,7 @@ class MyAdminIndexView(admin.AdminIndexView):
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):
         # handle user login
-        form = LoginForm(request.form)
+        form = LoginForm(request.POST)
         if helpers.validate_form_on_submit(form):
             user = form.get_user()
             login.login_user(user)
@@ -124,7 +124,7 @@ class MyAdminIndexView(admin.AdminIndexView):
 
     @expose('/register/', methods=('GET', 'POST'))
     def register_view(self):
-        form = RegistrationForm(request.form)
+        form = RegistrationForm(request.POST)
         if helpers.validate_form_on_submit(form):
             user = User()
 
@@ -152,14 +152,14 @@ class MyAdminIndexView(admin.AdminIndexView):
 # Flask views
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.jinja2')
 
 
 # Initialize flask-login
 init_login()
 
 # Create admin
-admin = admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(), base_template='my_master.html')
+admin = admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(), base_template='my_master.jinja2')
 
 # Add view
 admin.add_view(MyModelView(User, db.session))

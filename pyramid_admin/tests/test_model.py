@@ -233,9 +233,9 @@ def test_templates():
 
     client = app.test_client()
 
-    view.list_template = 'mock.html'
-    view.create_template = 'mock.html'
-    view.edit_template = 'mock.html'
+    view.list_template = 'mock.jinja2'
+    view.create_template = 'mock.jinja2'
+    view.edit_template = 'mock.jinja2'
 
     rv = client.get('/admin/model/')
     eq_(rv.data, b'Success!')

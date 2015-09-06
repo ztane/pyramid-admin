@@ -1,6 +1,6 @@
 from jinja2 import Markup
 
-from ._compat import string_types
+from .._compat import string_types
 from pyramid_admin import helpers
 
 

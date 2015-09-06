@@ -1,4 +1,5 @@
 import logging
+import transaction
 import warnings
 import inspect
 
@@ -8,7 +9,7 @@ from sqlalchemy.sql.expression import desc
 from sqlalchemy import Boolean, Table, func, or_
 from sqlalchemy.exc import IntegrityError
 
-from flask import flash
+from ..._compat import flash
 
 from pyramid_admin._compat import string_types, text_type
 from pyramid_admin.babel import gettext, ngettext, lazy_gettext
@@ -975,18 +976,19 @@ class ModelView(BaseModelView):
                 Form instance
         """
         try:
-            model = self.model()
-            form.populate_obj(model)
-            self.session.add(model)
-            self._on_model_change(form, model, True)
-            self.session.commit()
+            with self.session.begin_nested():
+                model = self.model()
+                form.populate_obj(model)
+                self.session.add(model)
+                self._on_model_change(form, model, True)
+                self.session.flush()
+
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 flash(gettext('Failed to create record. %(error)s', error=str(ex)), 'error')
                 log.exception('Failed to create record.')
 
-            self.session.rollback()
-
+            transaction.doom()
             return False
         else:
             self.after_model_change(form, model, True)
@@ -1003,15 +1005,16 @@ class ModelView(BaseModelView):
                 Model instance
         """
         try:
-            form.populate_obj(model)
-            self._on_model_change(form, model, False)
-            self.session.commit()
+            with self.session.begin_nested():
+                form.populate_obj(model)
+                self._on_model_change(form, model, False)
+
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 flash(gettext('Failed to update record. %(error)s', error=str(ex)), 'error')
                 log.exception('Failed to update record.')
 
-            self.session.rollback()
+            transaction.doom()
 
             return False
         else:
@@ -1027,17 +1030,17 @@ class ModelView(BaseModelView):
                 Model to delete
         """
         try:
-            self.on_model_delete(model)
-            self.session.flush()
-            self.session.delete(model)
-            self.session.commit()
+            with self.session.begin_nested():
+                self.on_model_delete(model)
+                self.session.delete(model)
+                self.session.flush()
+
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
                 log.exception('Failed to delete record.')
 
-            self.session.rollback()
-
+            transaction.doom()
             return False
         else:
             self.after_model_delete(model)
@@ -1068,14 +1071,16 @@ class ModelView(BaseModelView):
                     if self.delete_model(m):
                         count += 1
 
-            self.session.commit()
+            self.session.flush()
 
             flash(ngettext('Record was successfully deleted.',
                            '%(count)s records were successfully deleted.',
                            count,
                            count=count))
+
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
 
+            transaction.doom()
             flash(gettext('Failed to delete records. %(error)s', error=str(ex)), 'error')

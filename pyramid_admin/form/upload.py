@@ -1,7 +1,8 @@
 import os
 import os.path as op
 
-from werkzeug import secure_filename
+#TODO: remove werkzeug
+# from werkzeug import secure_filename
 from werkzeug.datastructures import FileStorage
 
 from wtforms import ValidationError, fields

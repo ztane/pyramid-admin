@@ -5,7 +5,7 @@ from pyramid_admin import Admin, BaseView, expose
 class MyView(BaseView):
     @expose('/')
     def index(self):
-        return self.render('index.html')
+        return self.render('index.jinja2')
 
 app = Flask(__name__)
 app.debug = True

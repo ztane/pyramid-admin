@@ -1,5 +1,5 @@
-from flask import json
 from wtforms.widgets import HTMLString, html_params
+from pyramid_admin import json
 
 from pyramid_admin._compat import as_unicode
 from pyramid_admin.babel import gettext
@@ -9,12 +9,12 @@ from pyramid_admin.form import RenderTemplateWidget
 
 class InlineFieldListWidget(RenderTemplateWidget):
     def __init__(self):
-        super(InlineFieldListWidget, self).__init__('admin/model/inline_field_list.html')
+        super(InlineFieldListWidget, self).__init__('admin/model/inline_field_list.jinja2')
 
 
 class InlineFormWidget(RenderTemplateWidget):
     def __init__(self):
-        super(InlineFormWidget, self).__init__('admin/model/inline_form.html')
+        super(InlineFormWidget, self).__init__('admin/model/inline_form.jinja2')
 
     def __call__(self, field, **kwargs):
         kwargs.setdefault('form_opts', getattr(field, 'form_opts', None))

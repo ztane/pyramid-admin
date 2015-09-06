@@ -1,6 +1,7 @@
+from pyramid.threadlocal import get_current_request
 from re import sub
 from jinja2 import contextfunction
-from flask import g, request, url_for, flash
+from ._compat import g, url_for, flash
 from wtforms.validators import DataRequired, InputRequired
 
 from pyramid_admin._compat import urljoin, urlparse, iteritems
@@ -55,6 +56,7 @@ def is_form_submitted():
     """
         Check if current method is PUT or POST
     """
+    request = get_current_request()
     return request and request.method in ('PUT', 'POST')
 
 
@@ -67,15 +69,13 @@ def validate_form_on_submit(form):
 
 def get_form_data():
     """
-        If current method is PUT or POST, return concatenated `request.form` with
+        If current method is PUT or POST, return concatenated `request.POST` with
         `request.files` or `None` otherwise.
     """
+    request = get_current_request()
     if is_form_submitted():
-        formdata = request.form
-        if request.files:
-            formdata = formdata.copy()
-            formdata.update(request.files)
-        return formdata
+        form_data = request.POST
+        return form_data
 
     return None
 
@@ -127,6 +127,8 @@ def prettify_class_name(name):
 
 
 def is_safe_url(target):
+    request = get_current_request()
+
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return (test_url.scheme in ('http', 'https') and
@@ -134,7 +136,8 @@ def is_safe_url(target):
 
 
 def get_redirect_target(param_name='url'):
-    target = request.values.get(param_name)
+    request = get_current_request()
+    target = request.params.get(param_name)
 
     if target and is_safe_url(target):
         return target

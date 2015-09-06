@@ -599,9 +599,9 @@ class ModelView(BaseModelView):
     # FileField access API
     @expose('/api/file/')
     def api_file_view(self):
-        pk = request.args.get('id')
-        coll = request.args.get('coll')
-        db = request.args.get('db', 'default')
+        pk = request.GET.get('id')
+        coll = request.GET.get('coll')
+        db = request.GET.get('db', 'default')
 
         if not pk or not coll or not db:
             abort(404)

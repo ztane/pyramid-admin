@@ -43,8 +43,8 @@ class Page(db.Model):
 class PageAdmin(sqla.ModelView):
     form_overrides = dict(text=CKTextAreaField)
 
-    create_template = 'create.html'
-    edit_template = 'edit.html'
+    create_template = 'create.jinja2'
+    edit_template = 'edit.jinja2'
 
 
 # Flask views

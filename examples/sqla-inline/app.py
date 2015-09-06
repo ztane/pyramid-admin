@@ -59,7 +59,7 @@ def _handle_image_delete(mapper, conn, target):
 # This widget uses custom template for inline field list
 class CustomInlineFieldListWidget(RenderTemplateWidget):
     def __init__(self):
-        super(CustomInlineFieldListWidget, self).__init__('field_list.html')
+        super(CustomInlineFieldListWidget, self).__init__('field_list.jinja2')
 
 
 # This InlineModelFormList will use our custom widget and hide row controls
@@ -110,7 +110,7 @@ class LocationAdmin(ModelView):
 @app.route('/')
 def index():
     locations = db.session.query(Location).all()
-    return render_template('locations.html', locations=locations)
+    return render_template('locations.jinja2', locations=locations)
 
 
 if __name__ == '__main__':

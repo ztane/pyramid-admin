@@ -91,6 +91,7 @@ class RenderTemplateWidget(object):
         self.template = template
 
     def __call__(self, field, **kwargs):
+        # TODO: rewrite
         ctx = _request_ctx_stack.top
         jinja_env = ctx.app.jinja_env
 

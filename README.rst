@@ -1,14 +1,9 @@
-Flask-Admin
-===========
+Pyramid-Admin
+=============
 
-The project was recently moved into its own organization. Please update your
-references to *git@github.com:flask-admin/flask-admin.git*.
+A fork of Flask-Admin for deep Pyramid integration.
 
-.. image:: https://d322cqt584bo4o.cloudfront.net/flask-admin/localized.png
-	:target: https://crowdin.com/project/flask-admin
-
-.. image:: https://travis-ci.org/flask-admin/flask-admin.png?branch=master
-	:target: https://travis-ci.org/flask-admin/flask-admin
+The documentation is in a state of flux.
 
 Introduction
 ------------

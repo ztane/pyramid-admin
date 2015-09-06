@@ -1,5 +1,5 @@
-from flask import request, redirect
-
+from pyramid.httpexceptions import HTTPFound
+from pyramid.threadlocal import get_current_request
 
 from pyramid_admin import tools
 from ._compat import text_type
@@ -36,7 +36,7 @@ class ActionsMixin(object):
         1. Add this mixin to your administrative view class
         2. Call `init_actions` in your class constructor
         3. Expose actions view
-        4. Import `actions.html` library and add call library macros in your template
+        4. Import `actions.jinja2` library and add call library macros in your template
     """
 
     def __init__(self):
@@ -102,8 +102,9 @@ class ActionsMixin(object):
                 Name of the view to return to after the request.
                 If not provided, will return user to the index view.
         """
-        action = request.form.get('action')
-        ids = request.form.getlist('rowid')
+        request = get_current_request()
+        action = request.POST.get('action')
+        ids = request.POST.getall('rowid')
 
         handler = self._actions_data.get(action)
 
@@ -118,4 +119,4 @@ class ActionsMixin(object):
         else:
             url = self.get_url('.' + return_view)
 
-        return redirect(url)
+        return HTTPFound(location=url)

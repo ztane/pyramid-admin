@@ -1,8 +1,7 @@
 import logging
 import shlex
+from pyramid.threadlocal import get_current_request
 import warnings
-
-from flask import request
 
 from jinja2 import Markup
 
@@ -156,7 +155,7 @@ class RedisCli(BaseView):
             :param msg:
                 Result to format.
         """
-        return self.render('admin/rediscli/response.html',
+        return self.render('admin/rediscli/response.jinja2',
                            type_name=lambda d: type(d).__name__,
                            result=result)
 
@@ -186,15 +185,16 @@ class RedisCli(BaseView):
         """
             Console view.
         """
-        return self.render('admin/rediscli/console.html')
+        return self.render('admin/rediscli/console.jinja2')
 
     @expose('/run/', methods=('POST',))
     def execute_view(self):
         """
             AJAX API.
         """
+        request = get_current_request()
         try:
-            cmd = request.form.get('cmd').lower()
+            cmd = request.POST.get('cmd').lower()
             if not cmd:
                 return self._error('Cli: Empty command.')
 

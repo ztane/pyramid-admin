@@ -140,15 +140,15 @@ class UserView(sqla.ModelView):
         rules.Field('city'),
         # String is resolved to form field, so there's no need to explicitly use `rules.Field`
         'country',
-        # Show macro from Flask-Admin lib.html (it is included with 'lib' prefix)
+        # Show macro from Flask-Admin lib.jinja2 (it is included with 'lib' prefix)
         rules.Container('rule_demo.wrap', rules.Field('notes'))
     ]
 
     # Use same rule set for edit page
     form_edit_rules = form_create_rules
 
-    create_template = 'rule_create.html'
-    edit_template = 'rule_edit.html'
+    create_template = 'rule_create.jinja2'
+    edit_template = 'rule_edit.jinja2'
 
 
 # Flask views

@@ -31,7 +31,7 @@ class NotAuthenticatedMenuLink(MenuLink):
 class MyAdminView(BaseView):
     @expose('/')
     def index(self):
-        return self.render('authenticated-admin.html')
+        return self.render('authenticated-admin.jinja2')
 
     def is_accessible(self):
         return current_user.is_authenticated()

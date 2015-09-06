@@ -1,8 +1,11 @@
+from pyramid.httpexceptions import HTTPNotFound
+from pyramid.threadlocal import get_current_request
 import warnings
 import re
 
-from flask import (request, redirect, flash, abort, json, Response,
-                   get_flashed_messages)
+from pyramid.response import Response
+from .._compat import flash, redirect, get_flashed_messages, json
+
 from jinja2 import contextfunction
 from wtforms.fields import HiddenField
 from wtforms.fields.core import UnboundField
@@ -17,8 +20,8 @@ from pyramid_admin.actions import ActionsMixin
 from pyramid_admin.helpers import (get_form_data, validate_form_on_submit,
                                  get_redirect_target, flash_errors)
 from pyramid_admin.tools import rec_getattr
-from pyramid_admin._backwards import ObsoleteAttr
-from pyramid_admin._compat import iteritems, OrderedDict, as_unicode
+from .._backwards import ObsoleteAttr
+from .._compat import iteritems, OrderedDict, as_unicode
 from .helpers import prettify_name, get_mdict_item_or_list
 from .ajax import AjaxModelLoader
 from .fields import ListEditableFieldList
@@ -90,13 +93,13 @@ class BaseModelView(BaseView, ActionsMixin):
     """Is model deletion allowed"""
 
     # Templates
-    list_template = 'admin/model/list.html'
+    list_template = 'admin/model/list.jinja2'
     """Default list view template"""
 
-    edit_template = 'admin/model/edit.html'
+    edit_template = 'admin/model/edit.jinja2'
     """Default edit template"""
 
-    create_template = 'admin/model/create.html'
+    create_template = 'admin/model/create.jinja2'
     """Default create template"""
 
     # Customizations
@@ -1011,11 +1014,12 @@ class BaseModelView(BaseView, ActionsMixin):
             The delete form originally used a GET request, so delete_form
             accepts both GET and POST request for backwards compatibility.
         """
-        if request.form:
-            return self._delete_form_class(request.form)
-        elif request.args:
-            # allow request.args for backward compatibility
-            return self._delete_form_class(request.args)
+        request = get_current_request()
+        if request.POST:
+            return self._delete_form_class(request.POST)
+        elif request.GET:
+            # allow request.GET for backward compatibility
+            return self._delete_form_class(request.GET)
         else:
             return self._delete_form_class()
 
@@ -1326,10 +1330,12 @@ class BaseModelView(BaseView, ActionsMixin):
 
     # URL generation helpers
     def _get_list_filter_args(self):
+        request = get_current_request()
+
         if self._filters:
             filters = []
 
-            for n in request.args:
+            for n in request.GET:
                 if not n.startswith('flt'):
                     continue
 
@@ -1341,7 +1347,7 @@ class BaseModelView(BaseView, ActionsMixin):
                 if key in self._filter_args:
                     idx, flt = self._filter_args[key]
 
-                    value = request.args[n]
+                    value = request.GET[n]
 
                     if flt.validate(value):
                         filters.append((pos, (idx, flt.name, value)))
@@ -1357,10 +1363,20 @@ class BaseModelView(BaseView, ActionsMixin):
         """
             Return arguments from query string.
         """
-        return ViewArgs(page=request.args.get('page', 0, type=int),
-                        sort=request.args.get('sort', None, type=int),
-                        sort_desc=request.args.get('desc', None, type=int),
-                        search=request.args.get('search', None),
+        request = get_current_request()
+
+        def coerce(value, default, type):
+            if value is None:
+                return default
+            try:
+                return type(value)
+            except ValueError:
+                return default
+
+        return ViewArgs(page=coerce(request.GET.get('page'), 0, type=int),
+                        sort=coerce(request.GET.get('sort'), None, type=int),
+                        sort_desc=coerce(request.GET.get('desc'), None, type=int),
+                        search=request.GET.get('search', None),
                         filters=self._get_list_filter_args())
 
     # URL generation helpers
@@ -1369,8 +1385,6 @@ class BaseModelView(BaseView, ActionsMixin):
             Generate page URL with current page, sort column and
             other parameters.
 
-            :param view:
-                View name
             :param view_args:
                 ViewArgs object with page number, filters, etc.
         """
@@ -1418,6 +1432,7 @@ class BaseModelView(BaseView, ActionsMixin):
             :param name:
                 Field name
         """
+        # noinspection PyUnresolvedReferences
         column_fmt = self.column_formatters.get(name)
         if column_fmt is not None:
             value = column_fmt(self, context, model, name)
@@ -1573,6 +1588,7 @@ class BaseModelView(BaseView, ActionsMixin):
         """
             Create model view
         """
+        request = get_current_request()
         return_url = get_redirect_target() or self.get_url('.index_view')
 
         if not self.can_create:
@@ -1588,7 +1604,7 @@ class BaseModelView(BaseView, ActionsMixin):
             model = self.create_model(form)
             if model:
                 flash(gettext('Record was successfully created.'))
-                if '_add_another' in request.form:
+                if '_add_another' in request.POST:
                     return redirect(request.url)
                 else:
                     # if we have a valid model, try to go to the edit view
@@ -1611,28 +1627,33 @@ class BaseModelView(BaseView, ActionsMixin):
         """
             Edit model view
         """
+
+        request = get_current_request()
         return_url = get_redirect_target() or self.get_url('.index_view')
 
         if not self.can_edit:
             return redirect(return_url)
 
-        id = get_mdict_item_or_list(request.args, 'id')
+        id = get_mdict_item_or_list(request.params, 'id')
         if id is None:
             return redirect(return_url)
 
         model = self.get_one(id)
+        print("editing2")
 
         if model is None:
-            return redirect(return_url)
+           print("no model")
+           return redirect(return_url)
 
         form = self.edit_form(obj=model)
         if not hasattr(form, '_validated_ruleset') or not form._validated_ruleset:
             self._validate_form_instance(ruleset=self._form_create_rules, form=form)
 
+        print("here already")
         if self.validate_form(form):
             if self.update_model(form, model):
                 flash(gettext('Record was successfully saved.'))
-                if '_continue_editing' in request.form:
+                if '_continue_editing' in request.POST:
                     return redirect(request.url)
                 else:
                     return redirect(return_url)
@@ -1688,18 +1709,19 @@ class BaseModelView(BaseView, ActionsMixin):
 
     @expose('/ajax/lookup/')
     def ajax_lookup(self):
-        name = request.args.get('name')
-        query = request.args.get('query')
-        offset = request.args.get('offset', type=int)
-        limit = request.args.get('limit', 10, type=int)
+        request = get_current_request()
+        name = request.GET.get('name')
+        query = request.GET.get('query')
+        offset = request.GET.get('offset', type=int)
+        limit = request.GET.get('limit', 10, type=int)
 
         loader = self._form_ajax_refs.get(name)
 
         if not loader:
-            abort(404)
+            raise HTTPNotFound()
 
         data = [loader.format(m) for m in loader.get_list(query, offset, limit)]
-        return Response(json.dumps(data), mimetype='application/json')
+        return Response(json.dumps(data), content_type='application/json')
 
     @expose('/ajax/update/', methods=('POST',))
     def ajax_update(self):
@@ -1707,7 +1729,7 @@ class BaseModelView(BaseView, ActionsMixin):
             Edits a single column of a record in list view.
         """
         if not self.column_editable_list:
-            abort(404)
+            raise HTTPNotFound()
 
         record = None
         form = self.list_form()

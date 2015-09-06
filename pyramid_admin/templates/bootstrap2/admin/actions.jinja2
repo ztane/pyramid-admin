@@ -1,4 +1,4 @@
-{% import 'admin/static.html' as admin_static with context %}
+{% import 'admin/static.jinja2' as admin_static with context %}
 
 {% macro dropdown(actions, btn_class='dropdown-toggle') -%}
     <a class="{{ btn_class }}" data-toggle="dropdown" href="javascript:void(0)">{{ _gettext('With selected') }}<b class="caret"></b></a>

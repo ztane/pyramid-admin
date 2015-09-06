@@ -1,6 +1,6 @@
 import logging
 
-from flask import flash
+from ..._compat import flash
 
 from pyramid_admin._compat import string_types
 from pyramid_admin.babel import gettext, ngettext, lazy_gettext

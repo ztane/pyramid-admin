@@ -99,23 +99,23 @@ class MyAdminIndexView(admin.AdminIndexView):
 # Flask views
 @app.route('/')
 def index():
-    return render_template('index.html', user=login.current_user)
+    return render_template('index.jinja2', user=login.current_user)
 
 
 @app.route('/login/', methods=('GET', 'POST'))
 def login_view():
-    form = LoginForm(request.form)
+    form = LoginForm(request.POST)
     if request.method == 'POST' and form.validate():
         user = form.get_user()
         login.login_user(user)
         return redirect(url_for('index'))
 
-    return render_template('form.html', form=form)
+    return render_template('form.jinja2', form=form)
 
 
 @app.route('/register/', methods=('GET', 'POST'))
 def register_view():
-    form = RegistrationForm(request.form)
+    form = RegistrationForm(request.POST)
     if request.method == 'POST' and form.validate():
         user = User()
 
@@ -125,7 +125,7 @@ def register_view():
         login.login_user(user)
         return redirect(url_for('index'))
 
-    return render_template('form.html', form=form)
+    return render_template('form.jinja2', form=form)
 
 
 @app.route('/logout/')
