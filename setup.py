@@ -60,6 +60,7 @@ setup(
         'shapely',
         'geoalchemy2',
         'psycopg2',
+        'pyramid_jinja2'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

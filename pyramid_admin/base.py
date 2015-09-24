@@ -3,6 +3,7 @@ from functools import wraps
 from pyramid.httpexceptions import HTTPForbidden
 
 from pyramid.renderers import render_to_response
+from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.threadlocal import get_current_registry
 from ._compat import g, url_for, get_flashed_messages
 from . import babel
@@ -275,7 +276,8 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
             view_func = getattr(self, name)
 
             config.add_view(view=self.view_wrapper(view_func),
-                            route_name=unique_route_name)
+                            route_name=unique_route_name,
+                            permission=NO_PERMISSION_REQUIRED)
 
     def view_wrapper(self, func):
         def wrapper(request, context):

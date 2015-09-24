@@ -141,7 +141,7 @@ _translation_table = {
     ord(u'>'): u'\\u003e',
     ord(u'&'): u'\\u0026',
     ord(u"'"): u'\\u0027',
-    ord(u'"'): u'\\u0022',
+#    ord(u'"'): u'\\u0022',
     ord(u'\u2028'): u'\\u2028',
     ord(u'\u2029'): u'\\u2029',
 }
