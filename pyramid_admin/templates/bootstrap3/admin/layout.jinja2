@@ -73,7 +73,7 @@
         {% set mapping = {'message': 'info', 'error': 'danger'} %}
         <div class="alert alert-{{ mapping.get(category, 'warning') }} alert-dismissable">
         {% else %}
-        <div class="alert alert-dismissable">
+        <div class="alert alert-info alert-dismissable">
         {% endif %}
 	      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
           {{ m }}
