@@ -1639,17 +1639,14 @@ class BaseModelView(BaseView, ActionsMixin):
             return redirect(return_url)
 
         model = self.get_one(id)
-        print("editing2")
 
         if model is None:
-           print("no model")
            return redirect(return_url)
 
         form = self.edit_form(obj=model)
         if not hasattr(form, '_validated_ruleset') or not form._validated_ruleset:
             self._validate_form_instance(ruleset=self._form_create_rules, form=form)
 
-        print("here already")
         if self.validate_form(form):
             if self.update_model(form, model):
                 flash(gettext('Record was successfully saved.'))
