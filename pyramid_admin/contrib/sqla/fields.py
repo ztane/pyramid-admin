@@ -252,5 +252,6 @@ class InlineModelFormList(InlineFieldList):
 
 def get_pk_from_identity(obj):
     # TODO: Remove me
-    cls, key = identity_key(instance=obj)
-    return u':'.join(text_type(x) for x in key)
+    # SQLAlchemy 1.2 compatibility, just use the item[1]
+    key = identity_key(instance=obj)
+    return u':'.join(text_type(x) for x in key[1])
