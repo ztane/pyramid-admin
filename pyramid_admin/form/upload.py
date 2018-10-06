@@ -16,8 +16,7 @@ except ImportError:
 from pyramid_admin.babel import gettext
 from pyramid_admin.helpers import get_url
 
-from pyramid_admin._compat import string_types, urljoin
-
+from pyramid_admin._compat import string_types, urljoin, secure_filename
 
 try:
     from PIL import Image, ImageOps
